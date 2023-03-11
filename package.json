@@ -1,0 +1,41 @@
+{
+	"name": "phragon-react",
+	"private": true,
+	"version": "1.0.0",
+	"description": "React packages for websoftlab projects",
+	"scripts": {
+		"boilerpdalate": "phragon-script boilerplate",
+		"prettier": "phragon-script prettier",
+		"increment": "phragon-script increment",
+		"build": "phragon-script build",
+		"release": "phragon-script release --channel global",
+		"release-local": "phragon-script release --channel local"
+	},
+	"workspaces": [
+		"packages/*"
+	],
+	"keywords": [
+		"phragon",
+		"phragon-react",
+		"react"
+	],
+	"author": "phragon@websoftlab.com",
+	"license": "MIT",
+	"dependencies": {
+		"@phragon-util/script": "^0.0.4"
+	},
+	"devDependencies": {
+		"@types/node": "^14.14.31"
+	},
+	"browserslist": {
+		"production": [
+			"> 1%"
+		],
+		"node": [
+			"node 14"
+		]
+	},
+	"engines": {
+		"node": ">=14.0.0"
+	}
+}
