@@ -1,0 +1,53 @@
+{
+	"name": "@phragon-react/modal",
+	"version": "1.0.0",
+	"author": "phragon@websoftlab.com",
+	"license": "MIT",
+	"scripts": {
+		"build": "phragon-script build --cwd \"../../\" -P @phragon-react/modal",
+		"prettier": "phragon-script prettier --cwd \"../../\" -P @phragon-react/modal"
+	},
+	"dependencies": {
+		"@phragon-react/use-boolean": "*",
+		"@phragon-react/use-transition-end": "*",
+		"@phragon-react/mobx-state-value": "*",
+		"@phragon-util/plain-object": "^0.0.1",
+		"@phragon-util/proof": "^0.0.1"
+	},
+	"devDependencies": {
+		"@types/react": "^18.0.12",
+		"@phragon/render-driver-react": "^0.1.0-beta.102",
+		"@phragon/plugin-dashboard": "^0.1.0-beta.10",
+		"@phragon-react/dashboard": "*",
+		"mobx": "^6.4.0"
+	},
+	"peerDependencies": {
+		"@phragon/render-driver-react": "^0.1",
+		"@phragon-react/dashboard": "*",
+		"react": "^16.8.0 || ^17 || ^18",
+		"mobx": "^6.4.0"
+	},
+	"peerDependenciesMeta": {
+		"@phragon/render-driver-react": {
+			"optional": true
+		},
+		"@phragon-react/dashboard": {
+			"optional": true
+		}
+	},
+	"exports": {
+		".": {
+			"require": "./build/index.js"
+		},
+		"./component": {
+			"require": "./build/component/index.js"
+		}
+	},
+	"types": "build/index.d.ts",
+	"typesVersions": {
+		"*": {
+			"build/index.d.ts": ["src/index.ts"],
+			"*": ["src/*"]
+		}
+	}
+}
