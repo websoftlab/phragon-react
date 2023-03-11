@@ -1,0 +1,43 @@
+{
+	"name": "@phragon-react/popup",
+	"version": "1.0.0",
+	"author": "phragon@websoftlab.com",
+	"license": "MIT",
+	"scripts": {
+		"build": "phragon-script build --cwd \"../../\" -P @phragon-react/popup",
+		"prettier": "phragon-script prettier --cwd \"../../\" -P @phragon-react/popup"
+	},
+	"dependencies": {
+		"@floating-ui/react": "^0.20.1"
+	},
+	"devDependencies": {
+		"@types/react": "^18.0.12"
+	},
+	"exports": {
+		".": {
+			"require": "./build/index.js"
+		},
+		"./PopupManager": {
+			"require": "./build/PopupManager.js"
+		},
+		"./PopupManagerSafe": {
+			"require": "./build/PopupManagerSafe.js"
+		},
+		"./PopupStore": {
+			"require": "./build/PopupStore.js"
+		},
+		"./action": {
+			"require": "./build/action.js"
+		},
+		"./PopupComponent": {
+			"require": "./build/PopupComponent.js"
+		}
+	},
+	"types": "build/index.d.ts",
+	"typesVersions": {
+		"*": {
+			"build/index.d.ts": ["src/index.ts"],
+			"*": ["src/*"]
+		}
+	}
+}
