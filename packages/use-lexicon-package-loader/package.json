@@ -1,0 +1,29 @@
+{
+	"name": "@phragon-react/use-lexicon-package-loader",
+	"version": "1.0.0",
+	"author": "phragon@websoftlab.com",
+	"license": "MIT",
+	"scripts": {
+		"build": "phragon-script build --cwd \"../../\" -P @phragon-react/use-lexicon-package-loader",
+		"prettier": "phragon-script prettier --cwd \"../../\" -P @phragon-react/use-lexicon-package-loader"
+	},
+	"devDependencies": {
+		"@types/react": "^18.0.12"
+	},
+	"peerDependencies": {
+		"@phragon/render-driver-react": "^0.1",
+		"react": "^16.8.0 || ^17 || ^18"
+	},
+	"exports": {
+		".": {
+			"require": "./build/index.js"
+		}
+	},
+	"types": "build/index.d.ts",
+	"typesVersions": {
+		"*": {
+			"build/index.d.ts": ["src/index.ts"],
+			"*": ["src/*"]
+		}
+	}
+}
