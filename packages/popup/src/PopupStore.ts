@@ -13,13 +13,10 @@ function getHash(item: Popup.Item) {
 	return hash;
 }
 
-function findPopup(
-	store: PopupStore,
-	id: string
-): { found: false } | { found: true; index: number; popup: Popup.Item } {
+function findPopup(store: PopupStore, id: string) {
 	const index = store.popup.findIndex((item) => item.id === id);
 	if (index === -1) {
-		return { found: false };
+		return null;
 	} else {
 		return { found: true, index, popup: store.popup[index] };
 	}
@@ -49,7 +46,7 @@ export class PopupStore {
 
 	reOpen(id: string) {
 		const node = findPopup(this, id);
-		if (node.found && !node.popup.open) {
+		if (node && !node.popup.open) {
 			node.popup.open = true;
 			this._updateHash();
 		}
@@ -98,12 +95,12 @@ export class PopupStore {
 
 	isOpen(id: string): boolean {
 		const node = findPopup(this, id);
-		return node.found ? node.popup.open : false;
+		return node ? node.popup.open : false;
 	}
 
 	close(id: string): void {
 		const node = findPopup(this, id);
-		if (node.found && node.popup.open) {
+		if (node && node.popup.open) {
 			node.popup.open = false;
 			this._updateHash();
 		}
@@ -111,7 +108,7 @@ export class PopupStore {
 
 	destroy(id: string) {
 		const node = findPopup(this, id);
-		if (node.found) {
+		if (node) {
 			this.popup.splice(node.index, 1);
 			this._updateHash();
 			const func = this._onClose[id];
