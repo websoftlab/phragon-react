@@ -43,7 +43,7 @@ function reboot<State extends {} = DashboardStoreState>(
 			}
 			app.reload(state, props.init);
 		} else {
-			dashboard.emit("dashboard.toast", {
+			dashboard.emit("toast", {
 				text: data.message || "Unknown error",
 				id: "api-state-error",
 				level: "error",

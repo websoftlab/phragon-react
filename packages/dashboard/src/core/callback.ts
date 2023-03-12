@@ -19,7 +19,7 @@ function callback(service: DashboardService, props: CallbackActionProps, alterna
 			callback(...args);
 		}
 	} catch (err) {
-		service.emit("dashboard.toast", {
+		service.emit("toast", {
 			id: "callback-failure",
 			level: "error",
 			text: (err as any).message || String(err),

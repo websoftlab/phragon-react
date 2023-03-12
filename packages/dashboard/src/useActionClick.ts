@@ -77,7 +77,7 @@ export function useActionClick(option: UseActionClickOptions): UseActionClickHoo
 			}
 
 			const { name, props } = getActionObject(action);
-			const isAwait = name === "dashboard.api" || name === "dashboard.api.req";
+			const isAwait = name === "api" || name === "api.req";
 
 			if (isAwait) {
 				ref.current.wait = true;

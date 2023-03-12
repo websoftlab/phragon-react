@@ -59,7 +59,7 @@ function apiReq<Req extends {} = any>(
 }
 
 function translate(service: DashboardService, id: string, alternative: string) {
-	return service.emit<TranslateActionProps, string>("dashboard.translate", { id, alternative });
+	return service.emit<TranslateActionProps, string>("translate", { id, alternative });
 }
 
 // dashboard:api
@@ -73,7 +73,7 @@ function api(service: DashboardService, dump: Dump, apiUrlPrefix: string, props:
 		if (!data) {
 			data = { confirm: true };
 		}
-		service.emit<Modal.OpenConfirmActionProps>("dashboard.modal.confirm", {
+		service.emit<Modal.OpenConfirmActionProps>("modal.confirm", {
 			id,
 			text: message,
 			action: {
@@ -81,7 +81,7 @@ function api(service: DashboardService, dump: Dump, apiUrlPrefix: string, props:
 				name: okButton,
 				variant: "primary",
 				onClick() {
-					service.emit("dashboard.modal.close", { id });
+					service.emit("modal.close", { id });
 					let { method = "get", config = {} } = props;
 					method = method.toLowerCase();
 
@@ -102,11 +102,11 @@ function api(service: DashboardService, dump: Dump, apiUrlPrefix: string, props:
 					api(service, dump, apiUrlPrefix, props);
 				},
 			},
-		} as any);
+		});
 	}
 
 	function fallback(id: string, level: string, text: string) {
-		service.emit("dashboard.toast", {
+		service.emit("toast", {
 			id,
 			level,
 			text,
@@ -142,7 +142,7 @@ function api(service: DashboardService, dump: Dump, apiUrlPrefix: string, props:
 		fallback(
 			"system-error.api",
 			"error",
-			translate(service, "error.api.request.props", "Invalid properties for 'dashboard.api' request")
+			translate(service, "error.api.request.props", "Invalid properties for 'api' request")
 		);
 		return null;
 	}
@@ -216,7 +216,7 @@ function api(service: DashboardService, dump: Dump, apiUrlPrefix: string, props:
 
 	let n = 1;
 	const toastError = (err?: any) => {
-		service.emit("dashboard.toast", {
+		service.emit("toast", {
 			text: (err && err.message) || "Unknown error",
 			id: `api-callback-error:${id}-${n++}`,
 			level: "error",
@@ -273,7 +273,7 @@ function api(service: DashboardService, dump: Dump, apiUrlPrefix: string, props:
 		}
 
 		if (!catchError && message) {
-			service.emit("dashboard.toast", {
+			service.emit("toast", {
 				text: message,
 				id: (ok ? "info-" : "error-") + id,
 				level: ok ? "info" : "error",
