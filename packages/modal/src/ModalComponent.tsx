@@ -1,5 +1,5 @@
 import type { ElementType, ReactNode, HTMLProps } from "react";
-import type { Modal } from "./types";
+import type { Modal, ModalManagerDisableCloseOptions } from "./types";
 import type { ModalPaperProps } from "./component";
 import React from "react";
 import { useComponentContext } from "./context";
@@ -15,7 +15,7 @@ const interceptors: Modal.Interceptor<any>[] = [];
 const components: Record<string, ElementType> = { text: Text };
 const componentProps: Record<string, ModalComponentTypeProps> = { text: {} };
 
-export interface ModalComponentTypeProps<Prop extends {} = any> {
+export interface ModalComponentTypeProps<Prop extends {} = any> extends ModalManagerDisableCloseOptions {
 	closable?: boolean;
 	disableScale?: boolean;
 	size?: Modal.Size;
@@ -67,8 +67,16 @@ export function getModalComponent(name: string) {
 }
 
 export function ModalComponent(props: { modal: Modal.Item; onClose: () => void }) {
-	const { store, ModalActionButton, ModalPaper, ModalContent, ModalFooter, ModalHeader, ModalCloseButton } =
-		useComponentContext();
+	const {
+		store,
+		ModalActionButton,
+		ModalPaper,
+		ModalContent,
+		ModalFooter,
+		ModalHeader,
+		ModalCloseButton,
+		disableCloseButton,
+	} = useComponentContext();
 	const { modal, onClose } = props;
 	const { component, state, title, action } = modal;
 	const closable = modal.closable && !modal.lock;
@@ -76,9 +84,11 @@ export function ModalComponent(props: { modal: Modal.Item; onClose: () => void }
 	const isFooter = action.length > 0;
 	const context: Modal.Context = {
 		store,
+		title: isHeader ? title : null,
 		value: state.getValue(),
 		id: modal.id,
 		size: modal.size,
+		lock: modal.lock,
 		onClose,
 		props: modal.props,
 		closable,
@@ -86,20 +96,28 @@ export function ModalComponent(props: { modal: Modal.Item; onClose: () => void }
 
 	let content: ReactNode;
 	let paperProps: ModalPaperProps = {
+		role: component === "text" ? "alertdialog" : "dialog",
+		"aria-modal": "true",
 		isFull: modal.size === "full",
 	};
 
+	const headId = `head--${modal.id}`;
+	const contentId = `modal--${modal.id}`;
+
+	if (isHeader) {
+		paperProps["aria-labelledby"] = headId;
+	}
+	if (component === "text") {
+		paperProps["aria-describedby"] = contentId;
+	}
+
 	if (hasModalComponent(component)) {
-		const Component = getModalComponent(component);
+		const As = getModalComponent(component);
 		paperProps = {
 			...getDefaultModalComponentProps(component).paperProps,
 			...paperProps,
 		};
-		content = (
-			<ModalContent isHeader={isHeader} isFooter={isFooter}>
-				<Component {...modal.props} />
-			</ModalContent>
-		);
+		content = <As {...modal.props} />;
 	} else {
 		content = (
 			<div
@@ -116,9 +134,13 @@ export function ModalComponent(props: { modal: Modal.Item; onClose: () => void }
 	return (
 		<ModalContext.Provider value={context}>
 			<ModalPaper {...paperProps}>
-				{isHeader && <ModalHeader>{title}</ModalHeader>}
-				{closable && <ModalCloseButton onClick={onClose} />}
-				{content}
+				{isHeader && <ModalHeader id={headId}>{title}</ModalHeader>}
+				{closable && !disableCloseButton && !modal.disableCloseButton && (
+					<ModalCloseButton tabIndex="0" role="button" onClick={onClose} />
+				)}
+				<ModalContent id={contentId} isHeader={isHeader} isFooter={isFooter}>
+					{content}
+				</ModalContent>
 				{isFooter && (
 					<ModalFooter>
 						{action.map((item, index) => {

@@ -14,7 +14,7 @@ export const ModalBackdrop = React.forwardRef<HTMLDivElement, ModalBackdropProps
 			ref={ref}
 			style={{
 				...minAreaProps(),
-				backgroundColor: "rgba(black, 0.9)",
+				backgroundColor: "rgba(0,0,0,.85)",
 				zIndex: 500,
 				opacity: isOpen ? 1 : 0,
 				transition: ".3s opacity",

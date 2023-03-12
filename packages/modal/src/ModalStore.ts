@@ -4,11 +4,23 @@ import { action, makeObservable, observable } from "mobx";
 import { getDefaultModalComponentProps } from "./ModalComponent";
 
 function getHash(item: Modal.Item) {
-	const { id, open, lock, component, props } = item;
+	const { id, open, lock, disableEscapeButtonClose, disableCloseButton, disableBackdropClose, component, props } =
+		item;
 	const { onPropsHash } = getDefaultModalComponentProps(component);
 	let hash = `:/${component}--${id}.${open ? "y" : "n"}.${lock ? "l" : "u"}`;
-	if (open && onPropsHash) {
-		hash += `.${onPropsHash(props)}`;
+	if (open) {
+		if (disableEscapeButtonClose) {
+			hash += ".D-Esc";
+		}
+		if (disableCloseButton) {
+			hash += ".D-Button";
+		}
+		if (disableBackdropClose) {
+			hash += ".D-Back";
+		}
+		if (onPropsHash) {
+			hash += `.${onPropsHash(props)}`;
+		}
 	}
 	return hash;
 }
@@ -74,7 +86,20 @@ export class ModalStore {
 	}
 
 	open(options: Modal.OpenOptions): string {
-		let { id, component, closable, size, title, action, value = {}, onClose, ...rest } = options;
+		let {
+			id,
+			component,
+			closable,
+			size,
+			title,
+			action,
+			value = {},
+			onClose,
+			disableBackdropClose,
+			disableCloseButton,
+			disableEscapeButtonClose,
+			...rest
+		} = options;
 		if (id == null) {
 			id = component;
 		}
@@ -93,11 +118,23 @@ export class ModalStore {
 		if (typeof closable !== "boolean") {
 			closable = def.closable !== false;
 		}
+		if (typeof disableBackdropClose !== "boolean") {
+			disableBackdropClose = def.disableBackdropClose === true;
+		}
+		if (typeof disableCloseButton !== "boolean") {
+			disableCloseButton = def.disableCloseButton === true;
+		}
+		if (typeof disableEscapeButtonClose !== "boolean") {
+			disableEscapeButtonClose = def.disableEscapeButtonClose === true;
+		}
 
 		const latest = find(this, id);
 		const modal: Modal.Item = {
 			...rest,
 			id,
+			disableBackdropClose,
+			disableCloseButton,
+			disableEscapeButtonClose,
 			component,
 			title,
 			closable,

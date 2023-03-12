@@ -1,8 +1,8 @@
 import type { ModalStore } from "./ModalStore";
-import type { ModalComponentCollection } from "./types";
+import type { ModalComponentCollection, ModalManagerDisableCloseOptions } from "./types";
 import { createContext, useContext } from "react";
 
-export interface ComponentContextValue extends ModalComponentCollection {
+export interface ComponentContextValue extends ModalComponentCollection, Required<ModalManagerDisableCloseOptions> {
 	store: ModalStore;
 }
 

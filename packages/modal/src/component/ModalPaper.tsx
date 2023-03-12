@@ -15,6 +15,9 @@ export function ModalPaper(props: ModalPaperProps) {
 				color: "black",
 				borderRadius: isFull ? 0 : 10,
 				minHeight: 50,
+				position: "relative",
+				boxShadow: "0 4px 20px -4px rgba(0,0,0,.1)",
+				minWidth: 240,
 				...style,
 			}}
 		/>

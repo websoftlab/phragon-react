@@ -14,8 +14,8 @@ export function ModalContent(props: ModalContentProps) {
 			style={{
 				paddingLeft: 20,
 				paddingRight: 20,
-				paddingTop: isHeader ? 10 : 20,
-				paddingBottom: isFooter ? 10 : 20,
+				paddingTop: isHeader ? 15 : 20,
+				paddingBottom: isFooter ? 15 : 20,
 				...style,
 			}}
 		/>

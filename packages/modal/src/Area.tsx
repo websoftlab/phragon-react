@@ -4,6 +4,7 @@ import { useComponentContext } from "./context";
 import { ModalComponent, getDefaultModalComponentProps } from "./ModalComponent";
 import { useTransitionEnd } from "@phragon-react/use-transition-end";
 import { useBoolean } from "@phragon-react/use-boolean";
+import { requestAnimation, cancelAnimation } from "./util";
 
 export interface AreaProps {
 	modal: Modal.Item;
@@ -15,7 +16,7 @@ export interface AreaProps {
 export function Area(props: AreaProps) {
 	const { modal, fallbackTimeout, onClose, onExit } = props;
 	const { component, open: isOpen } = modal;
-	const { ModalArea, ModalContainer } = useComponentContext();
+	const { ModalArea, ModalContainer, disableBackdropClose } = useComponentContext();
 	const areaRef = React.useRef<HTMLDivElement | null>(null);
 	const { ref } = useTransitionEnd<HTMLDivElement>({ isOpen, onExit, fallbackTimeout });
 
@@ -24,26 +25,29 @@ export function Area(props: AreaProps) {
 
 	React.useEffect(() => {
 		if (isOpen && !isInit) {
-			const id = window.setTimeout(() => {
-				setIsInit();
-			}, 40);
+			const id = requestAnimation(setIsInit);
 			return () => {
-				window.clearTimeout(id);
+				cancelAnimation(id);
 			};
 		}
 	}, [isInit, isOpen]);
+
 	React.useEffect(() => {
-		const target = areaRef.current;
-		if (target) {
+		const area = areaRef.current;
+		if (area && !disableBackdropClose) {
 			let isFocus = false;
 			function focus(e: MouseEvent | TouchEvent) {
+				const { target } = e;
+				if (!target || !modal.closable || modal.lock || modal.disableBackdropClose) {
+					isFocus = false;
+					return;
+				}
+				const closable = target === area || (target as Element).closest("[aria-modal=true]") == null;
 				if (e.type === "mousedown" || e.type === "touchstart") {
-					if (e.target === target) {
-						isFocus = true;
-					}
+					isFocus = closable;
 				} else if (isFocus) {
 					isFocus = false;
-					if ((e.target === target && !modal.closable) || modal.lock) {
+					if (closable) {
 						onClose();
 					}
 				}
@@ -65,17 +69,13 @@ export function Area(props: AreaProps) {
 				toggle("touchend", 0);
 			};
 		}
-	}, [modal, onClose]);
+	}, [modal, disableBackdropClose, onClose]);
 
 	return (
 		<ModalArea ref={areaRef}>
 			<ModalContainer
 				{...def.props}
 				ref={ref}
-				component={modal.component}
-				props={modal.props}
-				onExit={onExit}
-				fallbackTimeout={fallbackTimeout}
 				isOpen={isInit && isOpen}
 				modalSize={modal.size}
 				disableScale={def.disableScale || false}

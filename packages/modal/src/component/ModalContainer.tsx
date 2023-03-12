@@ -32,7 +32,7 @@ export const ModalContainer = React.forwardRef<HTMLDivElement, ModalContainerPro
 	};
 	if (modalSize !== "full" && containerSize[modalSize]) {
 		containerStyle.marginTop = 20;
-		containerStyle.padding = "0 20px 30px 10px";
+		containerStyle.padding = "0 20px 30px 20px";
 		containerStyle.maxWidth = containerSize[modalSize];
 	}
 	return (

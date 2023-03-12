@@ -49,8 +49,10 @@ export function ModalActionButton(props: ModalActionButtonProps) {
 				...minButtonProps(),
 				backgroundColor: "#196bca",
 				color: "#ffffff",
-				padding: "12px 22px",
+				padding: "4px 16px",
 				borderRadius: 5,
+				height: 40,
+				lineHeight: "1.2",
 				...style,
 			}}
 		/>

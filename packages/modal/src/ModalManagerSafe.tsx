@@ -6,9 +6,19 @@ import { lockBodyScroll } from "./lockBodyScroll";
 import { Area } from "./Area";
 import { Backdrop } from "./Backdrop";
 import { ComponentContext } from "./context";
+import { mergeCallback, subscribeEscape } from "./util";
 
 export function ModalManagerSafe(props: ModalManagerSafeProps) {
-	const { backdropFallbackTimeout = 1000, areaFallbackTimeout = 1000, store, ...rest } = props;
+	const {
+		backdropFallbackTimeout = 1000,
+		areaFallbackTimeout = 1000,
+		disableBackdropClose = false,
+		disableEscapeButtonClose = false,
+		disableCloseButton = false,
+		store,
+		...rest
+	} = props;
+	const [, setHash] = React.useState("");
 	const [modal, setModal] = React.useState<Modal.Item | null>(null);
 
 	const onExitHandler = React.useCallback(() => {
@@ -52,26 +62,38 @@ export function ModalManagerSafe(props: ModalManagerSafeProps) {
 
 	React.useEffect(
 		() =>
-			reaction(
-				() => store.hash,
-				() => {
-					const top = store.top;
-					if (!top) {
-						return setModal(null);
-					}
+			mergeCallback(
+				subscribeEscape(store, disableEscapeButtonClose),
+				reaction(
+					() => store.hash,
+					(hash) => {
+						// update ui
+						setHash(hash);
 
-					// remove top if it not last
-					if (!top.open && store.length > 1) {
-						return store.destroy(top.id);
-					}
+						let top = store.top;
+						while (store.length > 1 && top != null && !top.open) {
+							store.destroy(top.id);
+							top = store.top;
+						}
 
-					setModal(top);
-				}
+						setModal(top);
+					}
+				)
 			),
 		[]
 	);
 
-	const ctx: ComponentContextValue = React.useMemo(() => ({ store, ...rest }), [store]);
+	const ctx: ComponentContextValue = React.useMemo(
+		() => ({
+			store,
+			disableBackdropClose,
+			disableEscapeButtonClose,
+			disableCloseButton,
+			...rest,
+		}),
+		[store]
+	);
+
 	return (
 		<ComponentContext.Provider value={ctx}>
 			<Backdrop fallbackTimeout={backdropFallbackTimeout} isOpen={isOpen} />

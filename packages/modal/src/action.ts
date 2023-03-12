@@ -7,7 +7,7 @@ import { rand } from "./util";
 import { emitAction } from "@phragon-react/dashboard";
 
 function translate(service: DashboardService, id: string, alternative: string) {
-	return service.emit<{ id: string; alternative: string }, string>("dashboard.translate", { id, alternative });
+	return service.emit<{ id: string; alternative: string }, string>("translate", { id, alternative });
 }
 
 function open(service: DashboardService, store: ModalStore, props: Modal.OpenActionProps): string {
@@ -52,7 +52,7 @@ function openConfirm(service: DashboardService, store: ModalStore, props: Modal.
 		}
 		action.unshift({
 			id: "close",
-			action: "dashboard.modal.close",
+			action: "modal.close",
 			name: closeButton,
 		});
 	}
@@ -80,9 +80,9 @@ function closeAll(store: ModalStore) {
 
 export function addModalActions(service: DashboardService, store: ModalStore) {
 	return service.addActions({
-		"dashboard.modal": (props: Modal.OpenActionProps) => open(service, store, props),
-		"dashboard.modal.confirm": (props: Modal.OpenConfirmActionProps) => openConfirm(service, store, props),
-		"dashboard.modal.close": (props: Modal.CloseActionProps = {}) => close(store, props),
-		"dashboard.modal.closeAll": () => closeAll(store),
+		modal: (props: Modal.OpenActionProps) => open(service, store, props),
+		"modal.confirm": (props: Modal.OpenConfirmActionProps) => openConfirm(service, store, props),
+		"modal.close": (props: Modal.CloseActionProps = {}) => close(store, props),
+		"modal.closeAll": () => closeAll(store),
 	});
 }

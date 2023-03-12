@@ -15,7 +15,7 @@ export function minButtonProps(): CSSProperties {
 	return {
 		display: "inline-flex",
 		justifyContent: "center",
-		alignContent: "center",
+		alignItems: "center",
 		flexShrink: 0,
 		textDecoration: "none",
 		border: "0 none",
