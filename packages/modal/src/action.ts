@@ -1,16 +1,20 @@
 import type { Modal } from "./types";
-import type { DashboardService } from "@phragon-react/dashboard";
+import type { ActionService } from "@phragon-util/action-service";
 import type { ModalStore } from "./ModalStore";
+import { emitAction } from "@phragon-util/action-service";
 import { isPlainObject } from "@phragon-util/plain-object";
 import { warning } from "@phragon-util/proof";
 import { rand } from "./util";
-import { emitAction } from "@phragon-react/dashboard";
 
-function translate(service: DashboardService, id: string, alternative: string) {
-	return service.emit<{ id: string; alternative: string }, string>("translate", { id, alternative });
+function translate(service: ActionService, id: string, alternative: string) {
+	if (service.hasAction("translate")) {
+		return service.emit<{ id: string; alternative: string }, string>("translate", { id, alternative });
+	} else {
+		return alternative;
+	}
 }
 
-function open(service: DashboardService, store: ModalStore, props: Modal.OpenActionProps): string {
+function open(service: ActionService, store: ModalStore, props: Modal.OpenActionProps): string {
 	if (!isPlainObject(props) || !props.component) {
 		warning(false, "Invalid open modal arguments (props)");
 		return "";
@@ -29,7 +33,7 @@ function open(service: DashboardService, store: ModalStore, props: Modal.OpenAct
 	});
 }
 
-function openConfirm(service: DashboardService, store: ModalStore, props: Modal.OpenConfirmActionProps) {
+function openConfirm(service: ActionService, store: ModalStore, props: Modal.OpenConfirmActionProps) {
 	let { title, text, id, action, closeButton } = props;
 	if (title == null) {
 		title = translate(service, "modal.confirm.title", location.hostname);
@@ -43,6 +47,26 @@ function openConfirm(service: DashboardService, store: ModalStore, props: Modal.
 		action = action.slice();
 	}
 
+	const onClose = () => {
+		service.emit("modal.close", { id });
+	};
+
+	action = action.map((item) => {
+		const { onClick, ...rest } = item;
+		return {
+			...rest,
+			onClick(event) {
+				if (typeof onClick === "function") {
+					onClick(event);
+					if (event && event.defaultPrevented) {
+						return;
+					}
+				}
+				onClose();
+			},
+		};
+	});
+
 	if (closeButton !== false) {
 		if (!closeButton) {
 			closeButton =
@@ -52,7 +76,8 @@ function openConfirm(service: DashboardService, store: ModalStore, props: Modal.
 		}
 		action.unshift({
 			id: "close",
-			action: "modal.close",
+			variant: "ghost",
+			onClick: onClose,
 			name: closeButton,
 		});
 	}
@@ -78,7 +103,7 @@ function closeAll(store: ModalStore) {
 	store.closeAll();
 }
 
-export function addModalActions(service: DashboardService, store: ModalStore) {
+export function addModalActions(service: ActionService, store: ModalStore) {
 	return service.addActions({
 		modal: (props: Modal.OpenActionProps) => open(service, store, props),
 		"modal.confirm": (props: Modal.OpenConfirmActionProps) => openConfirm(service, store, props),

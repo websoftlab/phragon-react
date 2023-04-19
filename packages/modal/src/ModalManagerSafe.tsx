@@ -16,6 +16,7 @@ export function ModalManagerSafe(props: ModalManagerSafeProps) {
 		disableEscapeButtonClose = false,
 		disableCloseButton = false,
 		store,
+		onMount,
 		...rest
 	} = props;
 	const [, setHash] = React.useState("");
@@ -44,7 +45,9 @@ export function ModalManagerSafe(props: ModalManagerSafeProps) {
 				}
 				store.destroy(top.id);
 			} else {
-				store.close(top.id);
+				if (!closed) {
+					store.close(top.id);
+				}
 				break;
 			}
 		}
@@ -52,6 +55,8 @@ export function ModalManagerSafe(props: ModalManagerSafeProps) {
 
 	const isExit = store.length === 0;
 	const isOpen = modal ? modal.open : false;
+
+	React.useEffect(() => (typeof onMount === "function" ? onMount(store) : undefined), [onMount, store]);
 
 	// prevent body scroll
 	React.useEffect(() => {

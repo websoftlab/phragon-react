@@ -1,0 +1,31 @@
+{
+	"name": "@phragon-react/jss",
+	"version": "1.0.0",
+	"author": "phragon@websoftlab.com",
+	"license": "MIT",
+	"scripts": {
+		"build": "phragon-script build --cwd \"../../\" -P @phragon-react/jss",
+		"prettier": "phragon-script prettier --cwd \"../../\" -P @phragon-react/jss"
+	},
+	"dependencies": {
+		"react-jss": "^10.10.0",
+		"@ctrl/tinycolor": "^3.6.0",
+		"@phragon-util/plain-object": "*"
+	},
+	"devDependencies": {
+		"jss": "^10.10.0",
+		"theming": "^3.3.0"
+	},
+	"exports": {
+		".": {
+			"require": "./build/index.js"
+		}
+	},
+	"types": "build/index.d.ts",
+	"typesVersions": {
+		"*": {
+			"build/index.d.ts": ["src/index.ts"],
+			"*": ["src/*"]
+		}
+	}
+}

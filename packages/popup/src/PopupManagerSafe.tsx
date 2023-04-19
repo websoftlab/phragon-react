@@ -5,10 +5,11 @@ import { PopupComponent } from "./PopupComponent";
 import { ManagerContext } from "./context";
 
 export function PopupManagerSafe(props: PopupManagerSafeProps) {
-	const { store, fadeDuration = 250, zIndex = 1500 } = props;
+	const { store, onMount, fadeDuration = 250, zIndex = 1500 } = props;
 	const [popups, setPopups] = React.useState<Popup.Item[]>([]);
 	const ctx = { fadeDuration, zIndex, store };
 
+	React.useEffect(() => (typeof onMount === "function" ? onMount(store) : undefined), [store, onMount]);
 	React.useEffect(
 		() =>
 			reaction(

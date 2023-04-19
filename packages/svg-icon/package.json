@@ -1,0 +1,32 @@
+{
+	"name": "@phragon-react/svg-icon",
+	"version": "1.0.0",
+	"author": "phragon@websoftlab.com",
+	"license": "MIT",
+	"scripts": {
+		"build": "phragon-script build --cwd \"../../\" -P @phragon-react/svg-icon",
+		"prettier": "phragon-script prettier --cwd \"../../\" -P @phragon-react/svg-icon"
+	},
+	"dependencies": {
+		"@phragon-util/global-var": "^0.0.2",
+		"@phragon-util/proof": "^0.0.3"
+	},
+	"devDependencies": {
+		"@types/react": "^18.0.12"
+	},
+	"peerDependencies": {
+		"react": "^16.8.0 || ^17 || ^18"
+	},
+	"exports": {
+		".": {
+			"require": "./build/index.js"
+		}
+	},
+	"types": "build/index.d.ts",
+	"typesVersions": {
+		"*": {
+			"build/index.d.ts": ["src/index.ts"],
+			"*": ["src/*"]
+		}
+	}
+}

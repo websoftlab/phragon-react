@@ -86,6 +86,55 @@ export default abstract class FStore<R> {
 		}
 	}
 
+	get fullName(): string {
+		if (this.parent) {
+			return this.parent.fullName + "--" + this.name;
+		} else {
+			return this.name;
+		}
+	}
+
+	push<Add extends {} = any>(options: { validators?: Record<IdType | keyof Add, ValidatorType | ValidatorType[]> }) {
+		const { validators } = options;
+		if (!isPlainObject<Record<IdType | keyof Add, ValidatorType | ValidatorType[]>>(validators)) {
+			return () => {};
+		}
+		const v: Map<string, Validator> = new Map();
+		const r: Map<IdType, boolean | undefined> = new Map();
+		const keys: string[] = [];
+		for (const key of Object.keys(validators)) {
+			if (key === "*") {
+				continue;
+			}
+			keys.push(key);
+			const { required, callback } = createValidator(validators[key]);
+			if (this._validators.hasOwnProperty(key)) {
+				v.set(key, this._validators[key]);
+			}
+			if (this._required.hasOwnProperty(key)) {
+				r.set(key, this._required[key]);
+			}
+			this._required[key] = required;
+			this._validators[key] = callback;
+		}
+		return () => {
+			for (const key of keys) {
+				if (v.has(key)) {
+					this._validators[key] = v.get(key)!;
+				} else {
+					delete this._validators[key];
+				}
+				if (r.has(key)) {
+					this._required[key] = r.get(key)!;
+				} else {
+					delete this._required[key];
+				}
+			}
+			v.clear();
+			r.clear();
+		};
+	}
+
 	protected get _fromChild() {
 		return this[FROM_CHILD_ID];
 	}

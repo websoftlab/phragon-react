@@ -5,11 +5,28 @@
 			"output": "."
 		},
 		{
-			"target": "types",
-			"output": ".",
+			"target": "module",
+			"output": "./esm",
 			"package.json": {
-				"types": "./index.d.ts"
+				"exports": {
+					".": {
+						"require": "./index.js",
+						"import": "./esm/index.js"
+					},
+					"./action": {
+						"require": "./action/index.js",
+						"import": "./esm/action/index.js"
+					},
+					"./manager": {
+						"require": "./manager/index.js",
+						"import": "./esm/manager/index.js"
+					}
+				}
 			}
+		},
+		{
+			"target": "types",
+			"output": "."
 		}
 	]
 }

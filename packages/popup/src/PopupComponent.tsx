@@ -1,6 +1,6 @@
 import type { ElementType, HTMLProps, ReactNode } from "react";
 import type { Popup } from "./types";
-import type { Middleware } from "@floating-ui/react";
+import type { Middleware, UseFloatingProps } from "@floating-ui/react";
 import React from "react";
 import {
 	useFloating,
@@ -14,6 +14,7 @@ import {
 	useTransitionStyles,
 } from "@floating-ui/react";
 import { useManagerContext } from "./context";
+import { invariant } from "@phragon-util/proof";
 
 const PopupContext = React.createContext<Popup.Context | null>(null);
 
@@ -31,6 +32,7 @@ export interface PopupComponentTypeProps<Prop = any> {
 	options?: Popup.ItemOptions;
 	onPropsHash?: (props: Prop) => string;
 	singleton?: boolean;
+	focusable?: boolean;
 }
 
 export function addPopupInterception<Prop = any>(interceptor: Popup.Interceptor<Prop>) {
@@ -74,46 +76,103 @@ export function getPopupComponent(name: string) {
 	return () => null;
 }
 
-function isNode(elm: any): elm is HTMLElement {
-	return !!(elm && elm.nodeType === 1 && elm.parentNode);
-}
+const saveLostPosition: () => Middleware = () => {
+	const data = { x: 0, y: 0 };
+	return {
+		name: "saveLostPosition",
+		options: {},
+		fn: (state) => {
+			const ref = state.elements.reference;
+			const found = ref && document.body.contains(ref as HTMLElement);
 
-const referrerWidth: () => Middleware = () => ({
-	name: "referrerWidth",
-	options: {},
-	fn: (state) => {
-		const ref = state.elements.reference;
-		const floating = state.elements.floating;
-		const data: { w: number | null } = state.middlewareData.referrerWidth || { w: null };
+			if (found) {
+				data.x = state.x;
+				data.y = state.y;
+				return { data };
+			}
 
-		if (isNode(floating)) {
-			const width = isNode(ref) ? ref.offsetWidth : 0;
-			if (data.w === width) {
-				return {};
-			}
-			if (width) {
-				floating.style.setProperty("--popup-referrer-width", `${width}px`);
-			} else {
-				floating.style.removeProperty("--popup-referrer-width");
-			}
-			data.w = width;
+			const xy = state.middlewareData.saveLostPosition || data;
 			return {
-				data,
-				reset: {
-					rects: true,
-				},
+				data: xy,
+				...xy,
 			};
-		}
+		},
+	};
+};
 
-		data.w = null;
-		return { data };
-	},
-});
+function FloatingPopup(props: {
+	children: ReactNode;
+	useFloatingProps: Partial<UseFloatingProps>;
+	bodyProps?: HTMLProps<HTMLDivElement>;
+}) {
+	const ctx = usePopup();
+	invariant(ctx, "Popup context is not defined");
+
+	const { store, fadeDuration, zIndex } = useManagerContext();
+	const { children, useFloatingProps, bodyProps = {} } = props;
+	const { x, y, refs, strategy, context } = useFloating(useFloatingProps);
+	const { id, ref, index, open, focusable } = ctx;
+
+	const headingId = useId();
+	const click = useClick(context);
+	const dismiss = useDismiss(context, {
+		outsidePress(event) {
+			const target = event.target as Element;
+			return !target.closest("[aria-haspopup=dialog]");
+		},
+	});
+	const role = useRole(context);
+	const { isMounted, styles: transitionStyles } = useTransitionStyles(context, { duration: fadeDuration });
+	const { getFloatingProps } = useInteractions([click, dismiss, role]);
+	const isDie = !open && !isMounted;
+
+	React.useEffect(() => {
+		if (isMounted) {
+			refs.setReference(ref);
+		}
+	}, [isMounted, ref]);
+
+	React.useEffect(() => {
+		if (isDie) {
+			store.destroy(id);
+		}
+	}, [store, id, isDie]);
+
+	if (!isMounted) {
+		return null;
+	}
+
+	const { style, ...bodyPropsRest } = bodyProps;
+
+	return (
+		<PopupContext.Provider value={ctx}>
+			<FloatingFocusManager context={context} initialFocus={focusable ? 0 : -1}>
+				<div
+					{...bodyPropsRest}
+					aria-labelledby={headingId}
+					ref={refs.setFloating}
+					style={{
+						...style,
+						...transitionStyles,
+						outline: "0 none",
+						zIndex: zIndex + index,
+						position: strategy,
+						top: y ?? 0,
+						left: x ?? 0,
+					}}
+					{...getFloatingProps()}
+				>
+					{children}
+				</div>
+			</FloatingFocusManager>
+		</PopupContext.Provider>
+	);
+}
 
 export function PopupComponent<Prop extends {} = any, State extends {} = {}>(props: {
 	popup: Popup.Item<Prop, State>;
 }) {
-	const { store, fadeDuration, zIndex } = useManagerContext();
+	const { store } = useManagerContext();
 	const { popup } = props;
 	const { id, index, open, ref, state, component, ...popupRest } = popup;
 
@@ -134,7 +193,7 @@ export function PopupComponent<Prop extends {} = any, State extends {} = {}>(pro
 
 	const ctx: Popup.Context = {
 		...popupRest,
-		value: state.getValue(),
+		state,
 		id,
 		index,
 		open,
@@ -160,14 +219,14 @@ export function PopupComponent<Prop extends {} = any, State extends {} = {}>(pro
 		placement = defProps.options?.placement;
 	}
 
-	const refMw = React.useMemo(() => referrerWidth(), []);
-	const { x, y, refs, strategy, context } = useFloating({
+	const refMw = React.useMemo(() => [saveLostPosition()], [id]);
+	const floatingProps: Partial<UseFloatingProps> = {
 		open,
 		onOpenChange,
 		placement,
-		middleware: [...middleware, refMw],
+		middleware: [...middleware, ...refMw],
 		whileElementsMounted,
-	});
+	};
 
 	let content: ReactNode;
 	if (hasPopupComponent(component)) {
@@ -186,60 +245,11 @@ export function PopupComponent<Prop extends {} = any, State extends {} = {}>(pro
 		);
 	}
 
-	const headingId = useId();
-	const click = useClick(context);
-	const dismiss = useDismiss(context, {
-		outsidePress(event) {
-			const target = event.target as Element;
-			return !target.closest("[aria-haspopup=dialog]");
-		},
-	});
-	const role = useRole(context);
-
-	const { isMounted, styles: transitionStyles } = useTransitionStyles(context, { duration: fadeDuration });
-	const { getFloatingProps } = useInteractions([click, dismiss, role]);
-
-	const isDie = !open && !isMounted;
-
-	React.useEffect(() => {
-		if (isMounted) {
-			refs.setReference(ref);
-		}
-	}, [isMounted, ref]);
-
-	React.useEffect(() => {
-		if (isDie) {
-			store.destroy(id);
-		}
-	}, [store, id, isDie]);
-
-	if (!isMounted) {
-		return null;
-	}
-
-	const { style, ...bodyPropsRest } = defProps.bodyProps || {};
-
 	return (
 		<PopupContext.Provider value={ctx}>
-			<FloatingFocusManager context={context}>
-				<div
-					{...bodyPropsRest}
-					aria-labelledby={headingId}
-					ref={refs.setFloating}
-					style={{
-						...style,
-						...transitionStyles,
-						outline: "0 none",
-						zIndex: zIndex + index,
-						position: strategy,
-						top: y ?? 0,
-						left: x ?? 0,
-					}}
-					{...getFloatingProps()}
-				>
-					{content}
-				</div>
-			</FloatingFocusManager>
+			<FloatingPopup useFloatingProps={floatingProps} bodyProps={defProps.bodyProps}>
+				{content}
+			</FloatingPopup>
 		</PopupContext.Provider>
 	);
 }

@@ -1,25 +1,24 @@
-import type { CSSProperties } from "react";
+import type { JssStyle } from "jss";
 
-export function minAreaProps(): CSSProperties {
-	return {
-		position: "fixed",
-		left: 0,
-		top: 0,
-		width: "100%",
-		height: "100%",
+export const minArea: JssStyle = {
+	position: "fixed",
+	left: 0,
+	top: 0,
+	width: "100%",
+	height: "100%",
+	minHeight: "-webkit-fill-available",
+	fallbacks: {
 		minHeight: "100vh",
-	};
-}
+	},
+};
 
-export function minButtonProps(): CSSProperties {
-	return {
-		display: "inline-flex",
-		justifyContent: "center",
-		alignItems: "center",
-		flexShrink: 0,
-		textDecoration: "none",
-		border: "0 none",
-		outline: "0 none",
-		cursor: "pointer",
-	};
-}
+export const minButton: JssStyle = {
+	display: "inline-flex",
+	justifyContent: "center",
+	alignItems: "center",
+	flexShrink: 0,
+	textDecoration: "none",
+	border: "0 none",
+	outline: "0 none",
+	cursor: "pointer",
+};

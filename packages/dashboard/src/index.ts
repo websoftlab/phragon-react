@@ -1,6 +1,13 @@
-export { DashboardContext, useDashboard, DashboardProvider } from "./context";
+export { DashboardContext, useDashboard } from "./context";
+export { DashboardProvider } from "./DashboardProvider";
 export { DashboardService } from "./DashboardService";
-export { useDashboardActionCallback, useActive, useBadge } from "./hooks";
-export { getActionObject, createAction, emitAction } from "./util";
-export { useActionClick } from "./useActionClick";
-export type { UseActionClickHook, UseActionClickOptions } from "./useActionClick";
+export { useActive, useBadge } from "./hooks";
+export { DashboardModalManager, DashboardPopupManager } from "./manager";
+
+export type { DashboardModalManagerProps, DashboardPopupManagerProps } from "./manager";
+export type {
+	StateRebootActionProps,
+	StateActionProps,
+	StateReloadActionProps,
+	StateUpdateActionProps,
+} from "./action";

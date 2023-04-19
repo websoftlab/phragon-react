@@ -178,8 +178,8 @@ export function useFormHook<Val = string, E extends HTMLInputElement = HTMLInput
 
 	// callbacks
 	const setValue = useCallback(
-		(value: Val) => {
-			store.set(name, value);
+		(value: Val, forceValid = false) => {
+			store.set(name, value, forceValid);
 		},
 		[store, name]
 	);
@@ -187,7 +187,7 @@ export function useFormHook<Val = string, E extends HTMLInputElement = HTMLInput
 		(event: ChangeEvent<E>) => {
 			const target = event.target;
 			if (target.type === "checkbox") {
-				store.set(name, event.target.checked);
+				store.set(name, event.target.checked, true);
 			} else {
 				store.set(name, event.target.value);
 			}
@@ -195,7 +195,7 @@ export function useFormHook<Val = string, E extends HTMLInputElement = HTMLInput
 		[store, name]
 	);
 	const onBlurHandler = useCallback(() => {
-		store.sanitize(name);
+		store.sanitize(name, true);
 	}, [store, name]);
 
 	// value

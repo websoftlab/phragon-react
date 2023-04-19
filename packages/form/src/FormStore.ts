@@ -1,5 +1,5 @@
 import type { FormStoreInterface, CreateFormOptions } from "./types";
-import type { Formatter, IdType } from "@phragon/validator";
+import type { Formatter, IdType, ValidatorType, FormatterType } from "@phragon/validator";
 import { createFormatter } from "@phragon/validator";
 import { clonePlainObject, isPlainObject } from "@phragon-util/plain-object";
 import ArrayFormStore from "./ArrayFormStore";
@@ -95,6 +95,65 @@ export default class FormStore<D extends {} = any> extends FStore<D> implements 
 		});
 	}
 
+	push<Add extends {} = any>(options: {
+		validators?: Record<IdType | keyof Add, ValidatorType | ValidatorType[]>;
+		formatters?: Record<IdType | keyof Add, Formatter>;
+		sanitizers?: Record<IdType | keyof Add, FormatterType | FormatterType[]>;
+	}): () => void {
+		const { sanitizers, formatters, ...rest } = options;
+		const parent = super.push(rest);
+		const formatterKeys: string[] = [];
+		const sanitizerKeys: string[] = [];
+		const f = new Map<IdType | keyof Add, Formatter>();
+		const s = new Map<IdType | keyof Add, Formatter>();
+		if (isPlainObject<Record<IdType | keyof Add, Formatter>>(formatters)) {
+			for (const key of Object.keys(formatters)) {
+				if (key === "*") {
+					continue;
+				}
+				const formatter = formatters[key];
+				if (typeof formatter !== "function") {
+					continue;
+				}
+				formatterKeys.push(key);
+				if (this._formatters.hasOwnProperty(key)) {
+					f.set(key, this._formatters[key]);
+				}
+				this._formatters[key] = formatters[key];
+			}
+		}
+		if (isPlainObject<Record<IdType | keyof Add, FormatterType | FormatterType[]>>(sanitizers)) {
+			for (const key of Object.keys(sanitizers)) {
+				if (key === "*") {
+					continue;
+				}
+				sanitizerKeys.push(key);
+				const sanitizer = createFormatter(sanitizers[key]);
+				if (this._sanitizers.hasOwnProperty(key)) {
+					s.set(key, this._sanitizers[key]);
+				}
+				this._sanitizers[key] = sanitizer;
+			}
+		}
+		return () => {
+			parent();
+			for (const key of formatterKeys) {
+				if (f.has(key)) {
+					this._formatters[key] = f.get(key)!;
+				} else {
+					delete this._formatters[key];
+				}
+			}
+			for (const key of sanitizerKeys) {
+				if (s.has(key)) {
+					this._sanitizers[key] = s.get(key)!;
+				} else {
+					delete this._sanitizers[key];
+				}
+			}
+		};
+	}
+
 	protected _setTouch(name: IdType, forceValid = false) {
 		const init = this[FORM_ID].init;
 		const value = this.form[name];
@@ -103,7 +162,7 @@ export default class FormStore<D extends {} = any> extends FStore<D> implements 
 		} else {
 			this.touchList[name] = value !== (init.hasOwnProperty(name) ? init[name] : "");
 		}
-		if (forceValid || this.touchList[name]) {
+		if (forceValid) {
 			this._valid(name, value);
 		} else if (this.errors.hasOwnProperty(name)) {
 			delete this.errors[name];
@@ -142,7 +201,7 @@ export default class FormStore<D extends {} = any> extends FStore<D> implements 
 
 		// set new value, or update
 		for (const key of Object.keys(data)) {
-			this.set(key, (data as any)[key]);
+			this.set(key, data[key as keyof D]);
 			const index = keys.indexOf(key);
 			if (index !== -1) {
 				keys.splice(index, 1);
@@ -166,14 +225,14 @@ export default class FormStore<D extends {} = any> extends FStore<D> implements 
 		}
 	}
 
-	sanitize(name: IdType | keyof D): boolean {
+	sanitize(name: IdType | keyof D, forceValid: boolean = false): boolean {
 		const prev = this.form[name];
 		if (this._sanitizers.hasOwnProperty(name)) {
 			this.form[name] = this._sanitizers[name as IdType](this.form[name], name as IdType);
 		} else if (this._sanitizerGlobal) {
 			this.form[name] = this._sanitizerGlobal(this.form[name], name as IdType);
 		}
-		if (prev !== this.form[name]) {
+		if (prev !== this.form[name] || forceValid) {
 			this._setTouch(name as IdType, true);
 			return true;
 		}
@@ -185,8 +244,8 @@ export default class FormStore<D extends {} = any> extends FStore<D> implements 
 	}
 
 	has(name: IdType | keyof D): boolean {
-		if (this.form[name] !== undefined) {
-			return true;
+		if (this.form[name] === undefined) {
+			return false;
 		}
 		return this.form.hasOwnProperty(name);
 	}
@@ -249,14 +308,14 @@ export default class FormStore<D extends {} = any> extends FStore<D> implements 
 		return valid;
 	}
 
-	del(name: IdType | keyof D): void {
+	del(name: IdType | keyof D, forceValid = false): void {
 		if (!this.has(name)) {
 			return;
 		}
 		delete this.form[name];
 		delete this._children[name as IdType];
 		const it = this[FORM_ID];
-		this._setTouch(name as IdType);
+		this._setTouch(name as IdType, forceValid);
 		if (!it.fromFill) {
 			updateParent(this);
 		}
@@ -266,7 +325,7 @@ export default class FormStore<D extends {} = any> extends FStore<D> implements 
 		return this.form[name];
 	}
 
-	set<Val = string>(name: IdType | keyof D, value: Val): void {
+	set<Val = string>(name: IdType | keyof D, value: Val, forceValid = false): void {
 		const prev = this.form[name];
 
 		// dynamic format value
@@ -283,7 +342,7 @@ export default class FormStore<D extends {} = any> extends FStore<D> implements 
 		}
 
 		this.form[name] = value;
-		this._setTouch(name as IdType);
+		this._setTouch(name as IdType, forceValid);
 
 		// update child
 		if (!this._fromChild) {

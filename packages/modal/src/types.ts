@@ -1,13 +1,7 @@
-import type { Dashboard } from "@phragon/plugin-dashboard";
+import type { ActionNS } from "@phragon-util/action-service";
+import type { UseOnActionClickOptions } from "@phragon-react/action-service";
 import type { ModalStore } from "./ModalStore";
-import type {
-	ElementType,
-	MouseEventHandler,
-	ForwardRefExoticComponent,
-	PropsWithoutRef,
-	RefAttributes,
-	FC,
-} from "react";
+import type { ElementType, ForwardRefExoticComponent, PropsWithoutRef, RefAttributes, FC } from "react";
 import type {
 	ModalActionButtonProps,
 	ModalAreaProps,
@@ -19,7 +13,7 @@ import type {
 	ModalHeaderProps,
 	ModalPaperProps,
 } from "./component";
-import type { MobxStateValue } from "@phragon-react/mobx-state-value";
+import type { MobxStateValue } from "@phragon-util/mobx-state-value";
 
 type ModalComponent<P, E extends HTMLElement = HTMLDivElement> =
 	| ElementType
@@ -54,6 +48,7 @@ export interface ModalManagerSafeProps
 		ModalManagerFallbackTimeout,
 		ModalManagerDisableCloseOptions {
 	store: ModalStore;
+	onMount?: (store: ModalStore) => void | (() => void);
 }
 
 export interface ModalManagerProps
@@ -61,7 +56,7 @@ export interface ModalManagerProps
 		ModalManagerFallbackTimeout,
 		ModalManagerDisableCloseOptions {
 	options?: Modal.StoreOptions;
-	loadableComponentPrefix?: string;
+	onMount?: (store: ModalStore) => void | (() => void);
 }
 
 export namespace Modal {
@@ -70,11 +65,15 @@ export namespace Modal {
 		get(name: string): ElementType<Prop>;
 	}
 
-	export interface ButtonAction extends Dashboard.ButtonAction {
-		onClick?: MouseEventHandler;
+	export interface ButtonAction extends UseOnActionClickOptions {
+		id: string;
+		name: string;
+		icon?: string;
+		variant?: string;
+		disabled?: boolean;
 	}
 
-	export type Size = "full" | "large" | "normal" | "medium" | "small";
+	export type Size<SizeName extends string = string> = "full" | "large" | "normal" | "medium" | "small" | SizeName;
 
 	export interface Item<Prop extends {} = {}, Value extends {} = {}>
 		extends Required<ModalManagerDisableCloseOptions> {
@@ -116,7 +115,7 @@ export namespace Modal {
 	}
 
 	export interface OpenActionProps extends OpenOptions {
-		onCloseAction?: Dashboard.Action;
+		onCloseAction?: ActionNS.ActionType;
 	}
 
 	export interface OpenConfirmActionProps {

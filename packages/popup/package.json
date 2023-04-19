@@ -8,10 +8,29 @@
 		"prettier": "phragon-script prettier --cwd \"../../\" -P @phragon-react/popup"
 	},
 	"dependencies": {
-		"@floating-ui/react": "^0.20.1"
+		"@floating-ui/react": "^0.20.1",
+		"@phragon-util/mobx-state-value": "^0.0.2",
+		"@phragon-util/proof": "^0.0.3",
+		"@phragon-util/plain-object": "^0.0.3"
 	},
 	"devDependencies": {
-		"@types/react": "^18.0.12"
+		"@phragon-util/action-service": "^0.0.3",
+		"@types/react": "^18.0.12",
+		"@phragon-react/action-service": "*"
+	},
+	"peerDependencies": {
+		"@phragon-util/action-service": "^0.0.3",
+		"@phragon-react/action-service": "*",
+		"react": "^16.8.0 || ^17 || ^18",
+		"mobx": "^6.4.0"
+	},
+	"peerDependenciesMeta": {
+		"@phragon-util/action-service": {
+			"optional": true
+		},
+		"@phragon-react/action-service": {
+			"optional": true
+		}
 	},
 	"exports": {
 		".": {

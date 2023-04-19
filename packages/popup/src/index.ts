@@ -5,6 +5,7 @@ export {
 	setDefaultPopupComponentProps,
 	getDefaultPopupComponentProps,
 	usePopup,
+	addPopupInterception,
 } from "./PopupComponent";
 export { PopupManager } from "./PopupManager";
 export { PopupManagerSafe } from "./PopupManagerSafe";

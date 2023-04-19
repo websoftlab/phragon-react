@@ -1,0 +1,24 @@
+{
+	"src": [
+		{
+			"target": "node",
+			"output": "."
+		},
+		{
+			"target": "module",
+			"output": "./esm"
+		},
+		{
+			"target": "types",
+			"output": "."
+		}
+	],
+	"feather-icons.json": {
+		"target": "copy",
+		"output": "feather-icons.json"
+	},
+	"types": {
+		"target": "copy",
+		"output": "."
+	}
+}

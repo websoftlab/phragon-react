@@ -1,14 +1,26 @@
 import type { Modal } from "./types";
-import { MobxStateValue } from "@phragon-react/mobx-state-value";
+import { MobxStateValue } from "@phragon-util/mobx-state-value";
 import { action, makeObservable, observable } from "mobx";
 import { getDefaultModalComponentProps } from "./ModalComponent";
 
 function getHash(item: Modal.Item) {
-	const { id, open, lock, disableEscapeButtonClose, disableCloseButton, disableBackdropClose, component, props } =
-		item;
+	const {
+		id,
+		open,
+		size,
+		lock,
+		disableEscapeButtonClose,
+		disableCloseButton,
+		disableBackdropClose,
+		component,
+		props,
+		title,
+		closable,
+	} = item;
 	const { onPropsHash } = getDefaultModalComponentProps(component);
 	let hash = `:/${component}--${id}.${open ? "y" : "n"}.${lock ? "l" : "u"}`;
 	if (open) {
+		hash += `.${closable ? "c" : "o"}.${size}.t-${JSON.stringify(title)}`;
 		if (disableEscapeButtonClose) {
 			hash += ".D-Esc";
 		}

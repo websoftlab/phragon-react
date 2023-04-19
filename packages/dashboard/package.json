@@ -8,39 +8,43 @@
 		"prettier": "phragon-script prettier --cwd \"../../\" -P @phragon-react/dashboard"
 	},
 	"dependencies": {
-		"hotkeys-js": "^3.10.1",
-		"@phragon-util/plain-object": "^0.0.1",
-		"@phragon-util/proof": "^0.0.1",
-		"@phragon-util/global-var": "^0.0.2"
+		"@phragon-util/action-service": "^0.0.3",
+		"@phragon-util/global-var": "^0.0.2",
+		"@phragon/path-to-pattern": "^0.1.1",
+		"@phragon/make-url": "^0.1.1",
+		"@phragon-react/action-service": "*"
 	},
 	"devDependencies": {
 		"mobx": "^6.4.0",
 		"@types/react": "^18.0.12",
-		"@phragon/plugin-dashboard": "^0.1.0-beta.10",
-		"@phragon/render-driver-react": "^0.1.0-beta.102",
-		"@phragon/path-to-pattern": "^0.1.0-beta.21",
-		"@phragon/lexicon": "^0.1.0-beta.17",
-		"@phragon/app": "^0.1.0-beta.29",
-		"@phragon/make-url": "^0.1.0-beta.19"
+		"@phragon/plugin-dashboard": "^0.1.0-beta.20",
+		"@phragon/render-driver-react": "^0.1.1",
+		"@phragon/app": "^0.1.1",
+		"@phragon-react/modal": "*",
+		"@phragon-react/popup": "*"
 	},
 	"peerDependencies": {
 		"mobx": "^6.4.0",
 		"react": "^16.8.0 || ^17 || ^18",
 		"@phragon/plugin-dashboard": "^0.1",
 		"@phragon/render-driver-react": "^0.1",
-		"@phragon/path-to-pattern": "^0.1"
+		"@phragon-react/modal": "*",
+		"@phragon-react/popup": "*"
 	},
 	"peerDependenciesMeta": {
 		"react-dom": {
+			"optional": true
+		},
+		"@phragon-react/modal": {
+			"optional": true
+		},
+		"@phragon-react/popup": {
 			"optional": true
 		}
 	},
 	"exports": {
 		".": {
 			"require": "./build/index.js"
-		},
-		"./useActionClick": {
-			"require": "./build/useActionClick.js"
 		},
 		"./context": {
 			"require": "./build/context.js"
@@ -51,29 +55,8 @@
 		"./hooks": {
 			"require": "./build/hooks.js"
 		},
-		"./util": {
-			"require": "./build/util.js"
-		},
-		"./core": {
-			"require": "./build/core/index.js"
-		},
-		"./core/api": {
-			"require": "./build/core/api.js"
-		},
-		"./core/util": {
-			"require": "./build/core/util.js"
-		},
-		"./core/translate": {
-			"require": "./build/core/translate.js"
-		},
-		"./core/callback": {
-			"require": "./build/core/callback.js"
-		},
-		"./core/state": {
-			"require": "./build/core/state.js"
-		},
-		"./core/route": {
-			"require": "./build/core/route.js"
+		"./action": {
+			"require": "./build/action/index.js"
 		}
 	},
 	"types": "build/index.d.ts",

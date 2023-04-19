@@ -3,6 +3,7 @@ import type { IdType, Formatter, FormatterType, Validator, ValidatorType } from 
 
 interface BaseFormStore<R> {
 	readonly name: string;
+	readonly fullName: string;
 	readonly wait: boolean;
 	readonly parent?: FormStoreInterface | ArrayFormStoreInterface;
 	errors: Record<IdType, string | string[]>;
@@ -22,11 +23,11 @@ interface BaseFormStore<R> {
 
 export interface FormStoreInterface<D = any> extends BaseFormStore<D> {
 	has(name: IdType | keyof D): boolean;
-	set<Val = string>(name: IdType | keyof D, value: Val): void;
+	set<Val = string>(name: IdType | keyof D, value: Val, forceValid?: boolean): void;
 	get<Val = string>(name: IdType | keyof D): Val | undefined;
-	del(name: IdType | keyof D): void;
+	del(name: IdType | keyof D, forceValid?: boolean): void;
 	fill(data: D, reset?: boolean): void;
-	sanitize(name: IdType): boolean;
+	sanitize(name: IdType, forceValid?: boolean): boolean;
 }
 
 export interface ArrayFormStoreInterface<D = any> extends BaseFormStore<D[]> {
@@ -71,7 +72,7 @@ interface FormHook<Store> {
 
 export interface FormInputHook<Val = string, E extends HTMLInputElement = HTMLInputElement>
 	extends FormHook<FormStoreInterface> {
-	setValue(value: Val): void;
+	setValue(value: Val, forceValid?: boolean): void;
 	touch: boolean;
 	required: boolean;
 	props: {

@@ -1,0 +1,28 @@
+{
+	"src": [
+		{
+			"target": "node",
+			"output": "."
+		},
+		{
+			"target": "module",
+			"output": "./esm",
+			"package.json": {
+				"exports": {
+					".": {
+						"require": "./index.js",
+						"import": "./esm/index.js"
+					},
+					"./action": {
+						"require": "./action/index.js",
+						"import": "./esm/action/index.js"
+					}
+				}
+			}
+		},
+		{
+			"target": "types",
+			"output": "."
+		}
+	]
+}

@@ -1,20 +1,17 @@
 import type { ElementType } from "react";
 import type { Placement, Middleware, ReferenceType } from "@floating-ui/react";
 import type { PopupStore } from "./PopupStore";
-import type { MobxStateValue } from "@phragon-react/mobx-state-value";
-import type { Dashboard } from "@phragon/plugin-dashboard";
+import type { MobxStateValue } from "@phragon-util/mobx-state-value";
+import type { ActionNS } from "@phragon-util/action-service";
 
-interface PopupManagerBaseProps {
+export interface PopupManagerProps {
 	fadeDuration?: number;
 	zIndex?: number;
 }
 
-export interface PopupManagerProps extends PopupManagerBaseProps {
-	loadableComponentPrefix?: string;
-}
-
-export interface PopupManagerSafeProps extends PopupManagerBaseProps {
+export interface PopupManagerSafeProps extends PopupManagerProps {
 	store: PopupStore;
+	onMount?: (store: PopupStore) => void | (() => void);
 }
 
 export namespace Popup {
@@ -33,6 +30,7 @@ export namespace Popup {
 		id: string;
 		ref: HTMLElement | null;
 		open: boolean;
+		focusable: boolean;
 		component: string;
 		props: Prop;
 		options: ItemOptions | (() => ItemOptions);
@@ -40,22 +38,22 @@ export namespace Popup {
 		index: number;
 	}
 
-	export interface Context<Prop extends {} = any, State extends {} = {}> extends Omit<Item<Prop, State>, "state"> {
-		store: any;
-		value: State;
+	export interface Context<Prop extends {} = any, State extends {} = {}> extends Item<Prop, State> {
+		store: PopupStore;
 		onClose: () => void;
 	}
 
 	export interface OpenOptions<Prop extends {} = any, State extends {} = {}>
-		extends Omit<Item<Prop>, "id" | "index" | "open" | "options" | "state"> {
+		extends Omit<Item<Prop>, "id" | "index" | "open" | "options" | "state" | "focusable"> {
 		id?: string;
 		options?: ItemOptions | (() => ItemOptions);
 		value?: State;
 		onClose?: () => void;
+		focusable?: boolean;
 	}
 
 	export interface OpenActionProps<Prop extends {} = any, State extends {} = {}> extends OpenOptions<Prop, State> {
-		onCloseAction?: Dashboard.Action;
+		onCloseAction?: ActionNS.ActionType;
 	}
 
 	export interface CloseActionProps {

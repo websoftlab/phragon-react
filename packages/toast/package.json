@@ -1,0 +1,56 @@
+{
+	"name": "@phragon-react/toast",
+	"version": "1.0.0",
+	"author": "phragon@websoftlab.com",
+	"license": "MIT",
+	"scripts": {
+		"build": "phragon-script build --cwd \"../../\" -P @phragon-react/toast",
+		"prettier": "phragon-script prettier --cwd \"../../\" -P @phragon-react/toast"
+	},
+	"dependencies": {
+		"@phragon-util/plain-object": "^0.0.3",
+		"@phragon-util/proof": "^0.0.3",
+		"@phragon-react/use-transition-end": "*"
+	},
+	"devDependencies": {
+		"@types/react": "^18.0.12",
+		"@phragon-util/action-service": "^0.0.3",
+		"@phragon-react/action-service": "*",
+		"@phragon-react/jss": "*",
+		"mobx": "^6.4.0",
+		"jss": "^10.10.0"
+	},
+	"peerDependencies": {
+		"@phragon-util/action-service": "^0.0.3",
+		"@phragon-react/action-service": "*",
+		"@phragon-react/jss": "*",
+		"react": "^16.8.0 || ^17 || ^18",
+		"mobx": "^6.4.0"
+	},
+	"peerDependenciesMeta": {
+		"@phragon-util/action-service": {
+			"optional": true
+		},
+		"@phragon-react/action-service": {
+			"optional": true
+		},
+		"@phragon-react/jss": {
+			"optional": true
+		}
+	},
+	"exports": {
+		".": {
+			"require": "./build/index.js"
+		},
+		"./component": {
+			"require": "./build/component/index.js"
+		}
+	},
+	"types": "build/index.d.ts",
+	"typesVersions": {
+		"*": {
+			"build/index.d.ts": ["src/index.ts"],
+			"*": ["src/*"]
+		}
+	}
+}

@@ -1,7 +1,7 @@
 import type { Popup } from "./types";
 import { action, makeObservable, observable } from "mobx";
 import { getDefaultPopupComponentProps } from "./PopupComponent";
-import { MobxStateValue } from "@phragon-react/mobx-state-value";
+import { MobxStateValue } from "@phragon-util/mobx-state-value";
 
 function getHash(item: Popup.Item) {
 	const { id, open, component, props } = item;
@@ -53,18 +53,19 @@ export class PopupStore {
 	}
 
 	open(options: Popup.OpenOptions): string {
-		let { id, component, options: opt = {}, value = {}, onClose, ...rest } = options;
+		let { id, component, options: opt = {}, value = {}, onClose, focusable, ...rest } = options;
 		if (id == null) {
 			id = component;
 		}
 
 		this._onClose[id] = onClose;
-		const { singleton = false } = getDefaultPopupComponentProps(component);
+		const { singleton = false, focusable: focusableOpt = true } = getDefaultPopupComponentProps(component);
 		const index = this.popup.findIndex((item) => (singleton ? item.component === component : item.id === id));
 		const popup: Popup.Item = {
 			...rest,
 			id,
 			component,
+			focusable: Boolean(focusable == null ? focusableOpt : focusable),
 			state: index === -1 ? new MobxStateValue(value) : this.popup[index].state,
 			options: opt,
 			open: true,

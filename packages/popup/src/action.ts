@@ -1,11 +1,11 @@
 import type { Popup } from "./types";
-import type { DashboardService } from "@phragon-react/dashboard";
+import type { ActionService } from "@phragon-util/action-service";
 import type { PopupStore } from "./PopupStore";
 import { isPlainObject } from "@phragon-util/plain-object";
 import { warning } from "@phragon-util/proof";
-import { emitAction } from "@phragon-react/dashboard";
+import { emitAction } from "@phragon-util/action-service";
 
-function open(service: DashboardService, store: PopupStore, props: Popup.OpenActionProps): string {
+function open(service: ActionService, store: PopupStore, props: Popup.OpenActionProps): string {
 	if (!isPlainObject(props) || !props.component) {
 		warning(false, "Invalid open popup arguments (props)");
 		return "";
@@ -25,7 +25,7 @@ function open(service: DashboardService, store: PopupStore, props: Popup.OpenAct
 }
 
 function toggle(
-	service: DashboardService,
+	service: ActionService,
 	store: PopupStore,
 	props: Popup.OpenActionProps
 ): { id: string; open: boolean } {
@@ -53,7 +53,7 @@ function closeAll(store: PopupStore) {
 	store.closeAll();
 }
 
-export function addPopupActions(service: DashboardService, store: PopupStore) {
+export function addPopupActions(service: ActionService, store: PopupStore) {
 	return service.addActions({
 		popup: (props: Popup.OpenActionProps) => open(service, store, props),
 		"popup.toggle": (props: Popup.OpenActionProps) => toggle(service, store, props),
