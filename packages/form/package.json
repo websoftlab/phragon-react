@@ -11,7 +11,7 @@
 		"@phragon-util/global-var": "^0.0.2",
 		"@phragon-util/plain-object": "^0.0.3",
 		"@phragon-util/async": "^0.0.2",
-		"@phragon/validator": "^0.1.1",
+		"@phragon/validator": "^0.1.2",
 		"validator": "^13.9.0",
 		"mobx": "^6.4.0"
 	},
