@@ -1,0 +1,29 @@
+{
+	"name": "@phragon-react/svg-icon-tabler",
+	"version": "0.0.1",
+	"author": "phragon@websoftlab.com",
+	"license": "MIT",
+	"scripts": {
+		"build": "phragon-script build --cwd \"../../\" -P @phragon-react/svg-icon-tabler",
+		"prettier": "phragon-script prettier --cwd \"../../\" -P @phragon-react/svg-icon-tabler"
+	},
+	"devDependencies": {
+		"@types/react": "^18.0.12"
+	},
+	"peerDependencies": {
+		"react": "^16.8.0 || ^17 || ^18",
+		"@phragon-react/svg-icon": "*"
+	},
+	"exports": {
+		".": {
+			"require": "./build/index.js"
+		}
+	},
+	"types": "build/index.d.ts",
+	"typesVersions": {
+		"*": {
+			"build/index.d.ts": ["src/index.ts"],
+			"*": ["src/*"]
+		}
+	}
+}
