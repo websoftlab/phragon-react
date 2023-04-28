@@ -6,9 +6,9 @@ Icon maker for the https://github.com/tabler/tabler-icons icon collection.\
 Website: https://tabler-icons.io/ \
 Tabler version: `2.17.0`
 
-<div style="text-align: center;">
-![Tabler Icons](/tabler-icons.png)
-</div>
+<p align="center">
+<img src="https://raw.githubusercontent.com/websoftlab/phragon-react/master/packages/svg-icon-tabler/tabler-icons.png" width="838" alt="Tabler Icons" />
+</p>
 
 ## ❯ Install
 
