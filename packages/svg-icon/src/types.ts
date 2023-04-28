@@ -10,13 +10,16 @@ export interface SvgIconMakerOptions {
 	props?: SVGProps<SVGSVGElement>;
 }
 
-export interface SvgIconProps<Name extends string = string> extends SVGProps<SVGSVGElement> {
-	icon?: SvgIconName<Name>;
+export interface SvgIconExternalProps {
 	title?: string;
 	description?: string;
 	horizontal?: boolean;
 	vertical?: boolean;
 	spin?: boolean | number;
+}
+
+export interface SvgIconProps<Name extends string = string> extends SVGProps<SVGSVGElement>, SvgIconExternalProps {
+	icon?: SvgIconName<Name>;
 	size?: null | number;
 }
 

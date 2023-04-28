@@ -1,10 +1,20 @@
 import type { SvgIconName, SvgIconMaker, SvgIconProps, SvgIconMakerOptions, SvgIconColorType } from "./types";
-import type { CSSProperties, ReactNode, SVGProps } from "react";
-import React, { forwardRef } from "react";
+import type {
+	CSSProperties,
+	ReactNode,
+	ReactElement,
+	SVGProps,
+	Dispatch,
+	SetStateAction,
+	MemoExoticComponent,
+	ComponentType,
+} from "react";
+import React, { memo, isValidElement, forwardRef, useState, useEffect } from "react";
 import { __isDev__ } from "@phragon-util/global-var";
-import { warning } from "@phragon-util/proof";
+import { warning, warningOnce } from "@phragon-util/proof";
 
-const icons: Map<SvgIconName, { maker: string; icon: any }> = new Map();
+const lazyLoad: Map<string, Set<Function>> = new Map();
+const icons: Map<SvgIconName, { maker: string; icon: MemoExoticComponent<ComponentType> }> = new Map();
 const iconMakers: Map<
 	string,
 	{ color: SvgIconColorType; maker: SvgIconMaker; size: number; props: SVGProps<SVGSVGElement> }
@@ -28,8 +38,15 @@ export function addSvgIcon<Name extends string = string, Prop = any>(
 	name: SvgIconName<Name>,
 	icon: Prop
 ) {
-	if (iconMakers.has(maker)) {
-		icons.set(name, { maker, icon });
+	const im = iconMakers.get(maker);
+	if (im) {
+		const loaded = icons.has(name);
+		icons.set(name, { maker, icon: memo(() => makeReactElement(im.maker(icon))) });
+		if (!loaded && lazyLoad.has(name)) {
+			lazyLoad.get(name)!.forEach((fn) => fn());
+		}
+	} else {
+		warningOnce(`im-notfound:${maker}`, false, `The "${maker}" icon maker not found`);
 	}
 }
 
@@ -37,15 +54,44 @@ export function addSvgIcons<Prop = any>(maker: string, data: Record<string, Prop
 	Object.keys(data).forEach((name) => addSvgIcon(maker, name, data[name]));
 }
 
+interface LazyState {
+	name: string | null;
+	loaded: boolean;
+}
+
+function makeReactElement(node: ReactNode): ReactElement {
+	return isValidElement(node) ? node : <>{node}</>;
+}
+
+function createLazyLoad(name: string, fn: Dispatch<SetStateAction<LazyState>>) {
+	const load = () => {
+		fn({ name, loaded: true });
+	};
+	if (!lazyLoad.has(name)) {
+		lazyLoad.set(name, new Set());
+	}
+	lazyLoad.get(name)!.add(load);
+	return () => {
+		const set = lazyLoad.get(name);
+		if (!set) {
+			return;
+		}
+		set.delete(load);
+		if (set.size === 0) {
+			lazyLoad.delete(name);
+		}
+	};
+}
+
 export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 	const {
 		icon,
-		children,
 		title = null,
 		description = null,
 		horizontal = false,
 		vertical = false,
 		spin = false,
+		children: childrenProp,
 		viewBox: viewBoxProp,
 		style: styleProp,
 		ref: refProp,
@@ -54,6 +100,7 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 	} = props;
 
 	let iconNode: ReactNode = null;
+	let children: ReactNode = childrenProp;
 	let colorType: SvgIconColorType = "fill";
 	let size = sizeProp || 24;
 	let svgProp: SVGProps<SVGSVGElement> = rest;
@@ -65,10 +112,23 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 		...styleProp,
 	};
 
+	const [state, setState] = useState<LazyState>({ name: icon || null, loaded: ic != null });
+	const loaded = ic != null;
+
+	useEffect(() => {
+		const name = icon || null;
+		if (name !== state.name) {
+			setState({ name, loaded });
+		} else if (name && !loaded) {
+			return createLazyLoad(name, setState);
+		}
+	}, [icon, loaded, state]);
+
+	let freeze = false;
 	if (ic) {
 		const mk = iconMakers.get(ic.maker)!;
 		colorType = mk.color;
-		iconNode = mk.maker(ic.icon);
+		iconNode = <ic.icon />;
 		svgProp = {
 			...svgProp,
 			...mk.props,
@@ -76,6 +136,15 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 		if (sizeProp == null) {
 			size = mk.size;
 		}
+	} else if (icon) {
+		freeze = true;
+		size = 24;
+		svgProp.strokeWidth = 0;
+		colorType = "fill";
+		iconNode = <path d="M12 7a5 5 0 1 1 -4.995 5.217l-.005 -.217l.005 -.217a5 5 0 0 1 4.995 -4.783z" />;
+	} else if (children) {
+		iconNode = children;
+		children = null;
 	}
 
 	let viewBox: string;
@@ -95,14 +164,15 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 		transform.push(`rotate(${rotate}deg)`);
 	}
 
-	if (transform.length > 0) {
+	if (!freeze && transform.length > 0) {
 		style.transform = transform.join(" ");
 		style.transformOrigin = "center";
 	}
 
 	let body: ReactNode = iconNode;
+	let backdrop: ReactNode = <path stroke="none" fill="none" d={`M0 0h${size}v${size}H0z`} strokeWidth="0" />;
 
-	if (spin && body !== null) {
+	if (!freeze && spin && body !== null) {
 		const size05 = size / 2;
 		let inverse = false;
 		let spinSec = 3;
@@ -115,10 +185,8 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 		}
 		body = (
 			<g>
+				{backdrop}
 				{iconNode}
-				{!(horizontal || vertical || rotate !== 0) && (
-					<rect width={size} height={size} fill="transparent" stroke="transparent" strokeWidth="0" />
-				)}
 				<animateTransform
 					attributeName="transform"
 					attributeType="XML"
@@ -130,6 +198,7 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 				/>
 			</g>
 		);
+		backdrop = null;
 	}
 
 	let ariaLabelledby;
@@ -161,6 +230,7 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 		>
 			{title && <title id={labelledById}>{title}</title>}
 			{description && <desc id={describedById}>{description}</desc>}
+			{backdrop}
 			{body}
 			{children}
 		</svg>
