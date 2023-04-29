@@ -83,14 +83,25 @@ function createLazyLoad(name: string, fn: Dispatch<SetStateAction<LazyState>>) {
 	};
 }
 
+function mixClasses(first: string | undefined, second: string | undefined) {
+	if (first != null) {
+		if (!second) {
+			return first;
+		}
+		return first ? `${first} ${second}` : second;
+	} else {
+		return second;
+	}
+}
+
 export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 	const {
-		icon,
 		title = null,
 		description = null,
 		horizontal = false,
 		vertical = false,
 		spin = false,
+		icon: iconProp,
 		children: childrenProp,
 		viewBox: viewBoxProp,
 		style: styleProp,
@@ -103,20 +114,22 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 	let children: ReactNode = childrenProp;
 	let colorType: SvgIconColorType = "fill";
 	let size = sizeProp || 24;
+	let boxSize = sizeProp || 24;
 	let svgProp: SVGProps<SVGSVGElement> = rest;
-
-	const { rotate = 0 } = props;
-	const ic = icon && icons.get(icon);
-	const transform: string[] = [];
-	const style: CSSProperties = {
+	let style: CSSProperties = {
 		...styleProp,
 	};
 
-	const [state, setState] = useState<LazyState>({ name: icon || null, loaded: ic != null });
+	const icon = typeof iconProp === "string" && iconProp.length > 0 ? iconProp : null;
+	const { rotate = 0 } = props;
+	const ic = icon && icons.get(icon);
+	const transform: string[] = [];
+
+	const [state, setState] = useState<LazyState>({ name: icon, loaded: ic != null });
 	const loaded = ic != null;
 
 	useEffect(() => {
-		const name = icon || null;
+		const name = icon;
 		if (name !== state.name) {
 			setState({ name, loaded });
 		} else if (name && !loaded) {
@@ -127,18 +140,26 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 	let freeze = false;
 	if (ic) {
 		const mk = iconMakers.get(ic.maker)!;
+		const { style: styleProp, className, ...rest } = mk.props;
+		boxSize = mk.size;
 		colorType = mk.color;
 		iconNode = <ic.icon />;
 		svgProp = {
+			...rest,
 			...svgProp,
-			...mk.props,
 		};
 		if (sizeProp == null) {
-			size = mk.size;
+			size = boxSize;
+		}
+		if (styleProp) {
+			style = { ...styleProp, ...style };
+		}
+		if (className != null) {
+			svgProp.className = mixClasses(svgProp.className, className);
 		}
 	} else if (icon) {
 		freeze = true;
-		size = 24;
+		boxSize = 24;
 		svgProp.strokeWidth = 0;
 		colorType = "fill";
 		iconNode = <path d="M12 7a5 5 0 1 1 -4.995 5.217l-.005 -.217l.005 -.217a5 5 0 0 1 4.995 -4.783z" />;
@@ -148,10 +169,10 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 	}
 
 	let viewBox: string;
-	if (viewBoxProp) {
+	if (!icon && viewBoxProp) {
 		viewBox = viewBoxProp;
 	} else {
-		viewBox = `0 0 ${size} ${size}`;
+		viewBox = `0 0 ${boxSize} ${boxSize}`;
 	}
 
 	if (horizontal) {
@@ -170,10 +191,10 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 	}
 
 	let body: ReactNode = iconNode;
-	let backdrop: ReactNode = <path stroke="none" fill="none" d={`M0 0h${size}v${size}H0z`} strokeWidth="0" />;
+	let backdrop: ReactNode = <path stroke="none" fill="none" d={`M0 0h${boxSize}v${boxSize}H0z`} strokeWidth="0" />;
 
 	if (!freeze && spin && body !== null) {
-		const size05 = size / 2;
+		const size05 = boxSize / 2;
 		let inverse = false;
 		let spinSec = 3;
 		if (typeof spin === "number") {
