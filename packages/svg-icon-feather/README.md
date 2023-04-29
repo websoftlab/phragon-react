@@ -3,7 +3,8 @@
 Extender for the `@phragon-react/svg-icon` package.
 
 Icon maker for the https://github.com/feathericons/feather icon collection.\
-Feather `v4.29.0`
+Feather website: https://feathericons.com/ \
+Feather version: `4.29.0`
 
 ## ❯ Install
 
@@ -20,16 +21,16 @@ import { addFeatherSvgIconMaker } from "@phragon-react/svg-icon-feather";
 // add maker
 addFeatherSvgIconMaker();
 
-async function someLoaderFunction() {
-	const { icons } = await import("@phragon-react/svg-icon-feather/feather-icons.json");
-	addSvgIcons("feather", icons);
-}
+// load icons
+import("@phragon-react/svg-icon-feather/feather-icons.json")
+    .then(({ icons }) => {
+	    addSvgIcons("feather", icons);
+    })
+    .catch(error => {
+	    console.error("Feather icons load failure", error);
+    });
 
-someLoaderFunction().then(() => {
-	console.log("Feather icons package added");
-});
-
-// use after loaded:
+// usage icon
 function SomeMenuIconComponent() {
 	return (
 		<SvgIcon icon="menu" />

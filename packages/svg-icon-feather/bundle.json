@@ -13,9 +13,9 @@
 			"output": "."
 		}
 	],
-	"feather-icons.json": {
+	"json": {
 		"target": "copy",
-		"output": "feather-icons.json"
+		"output": "."
 	},
 	"types": {
 		"target": "copy",
