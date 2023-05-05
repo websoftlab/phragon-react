@@ -3,7 +3,11 @@ import type { SvgIconMaker, SvgIconMakerOptions } from "@phragon-react/svg-icon"
 import { addSvgIconMaker } from "@phragon-react/svg-icon";
 import React from "react";
 
-export const featherIconMaker: SvgIconMaker = function featherIconMaker(type: IconFeatherType) {
+export const featherIconMaker: SvgIconMaker<IconFeatherType> = function featherIconMaker(type: IconFeatherType) {
+	if (type.length === 1) {
+		const item = type[0];
+		return <item.n {...item.a} />;
+	}
 	return (
 		<>
 			{type.map((item, index) => (
