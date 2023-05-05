@@ -20,9 +20,5 @@
 	"json": {
 		"target": "copy",
 		"output": "."
-	},
-	"tabler-icons.png": {
-		"target": "copy",
-		"output": "tabler-icons.png"
 	}
 }

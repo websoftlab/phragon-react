@@ -3,7 +3,7 @@
 Extender for the `@phragon-react/svg-icon` package.
 
 Icon maker for the https://github.com/tabler/tabler-icons icon collection.\
-Website: https://tabler-icons.io/ \
+Tabler website: https://tabler-icons.io/ \
 Tabler version: `2.17.0`
 
 <p align="center">
@@ -43,7 +43,7 @@ import("@phragon-react/svg-icon-tabler/tabler-filled.json")
 		console.error("Icon (filled) load failure", error);
 	});
 
-// use icon:
+// usage icon
 function SomeMenuIconComponent() {
 	return (
 		<SvgIcon icon="menu" />
