@@ -1,0 +1,24 @@
+{
+	"src": [
+		{
+			"target": "node",
+			"output": "."
+		},
+		{
+			"target": "module",
+			"output": "./esm"
+		},
+		{
+			"target": "types",
+			"output": "."
+		}
+	],
+	"types": {
+		"target": "copy",
+		"output": "."
+	},
+	"json": {
+		"target": "copy",
+		"output": "."
+	}
+}
