@@ -1,13 +1,14 @@
 import type { SVGProps, ReactNode } from "react";
 
-export type SvgIconMaker<Prop = any> = (props: Prop) => ReactNode;
+export type SvgIconMaker<Prop = any, Conf extends {} = {}> = (props: Prop, conf?: Conf) => ReactNode;
 
 export type SvgIconColorType = "fill" | "stroke" | "none" | "ignore";
 
-export interface SvgIconMakerOptions {
+export interface SvgIconMakerOptions<Conf extends {} = {}> {
 	color?: SvgIconColorType;
 	size?: number;
 	props?: SVGProps<SVGSVGElement>;
+	config?: Conf;
 }
 
 export interface SvgIconExternalProps {

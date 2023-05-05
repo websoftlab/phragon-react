@@ -17,12 +17,12 @@ const lazyLoad: Map<string, Set<Function>> = new Map();
 const icons: Map<SvgIconName, { maker: string; icon: MemoExoticComponent<ComponentType> }> = new Map();
 const iconMakers: Map<
 	string,
-	{ color: SvgIconColorType; maker: SvgIconMaker; size: number; props: SVGProps<SVGSVGElement> }
+	{ color: SvgIconColorType; maker: SvgIconMaker; size: number; props: SVGProps<SVGSVGElement>; config: any }
 > = new Map();
 
 export function addSvgIconMaker<T = any>(name: string, maker: SvgIconMaker<T>, options: SvgIconMakerOptions = {}) {
-	const { color = "fill", size = 24, props = {} } = options;
-	iconMakers.set(name, { color, maker, size, props });
+	const { color = "fill", size = 24, props = {}, config } = options;
+	iconMakers.set(name, { color, maker, size, props, config });
 }
 
 export function isSvgIconName<Name extends string = string>(name: any): name is SvgIconName<Name> {
@@ -41,7 +41,7 @@ export function addSvgIcon<Name extends string = string, Prop = any>(
 	const im = iconMakers.get(maker);
 	if (im) {
 		const loaded = icons.has(name);
-		icons.set(name, { maker, icon: memo(() => makeReactElement(im.maker(icon))) });
+		icons.set(name, { maker, icon: memo(() => makeReactElement(im.maker(icon, im.config))) });
 		if (!loaded && lazyLoad.has(name)) {
 			lazyLoad.get(name)!.forEach((fn) => fn());
 		}
@@ -148,9 +148,6 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
 			...rest,
 			...svgProp,
 		};
-		if (sizeProp == null) {
-			size = boxSize;
-		}
 		if (styleProp) {
 			style = { ...styleProp, ...style };
 		}
